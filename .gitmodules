@@ -1,0 +1,3 @@
+[submodule "readline"]
+	path = readline
+	url = git://github.com/igoralmeida/readline-go.git
