@@ -13,11 +13,13 @@ func execute(inch chan *command) {
 	var cmd *exec.Cmd
 	var err os.Error
 
-	var argv0 string
+	var argv0, dir string
 	var argv []string
 
 	for {
 		c = <-inch
+
+		dir = os.Getenv("PWD")
 
 		switch c.cmdtype {
 		case BUILTIN:
@@ -33,7 +35,7 @@ func execute(inch chan *command) {
 			}
 			envv := os.Environ()
 
-			cmd, err = exec.Run(argv0, argv, envv,
+			cmd, err = exec.Run(argv0, argv, envv, dir,
 				exec.PassThrough, exec.PassThrough, exec.PassThrough)
 
 			err = cmd.Close()
