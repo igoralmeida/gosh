@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+var status parseStatus
+
 //loop forever: get line from readch and treat it accordingly
 func Gosh() {
 	readch := make(chan string)
@@ -15,21 +17,15 @@ func Gosh() {
 	initializeCommands()
 	parser := initializeParser()
 
-	go readline(readch)
+	go prompter(readch)
 	go execute(exch)
 
-	var line, outputStr string
-	var status parseStatus
+	var line string
 	var cmd *command
-	var promptFunc (func() string)
 
 	status = READY
 
 	for {
-		promptFunc = getPromptFunc(status)
-		outputStr = promptFunc()
-		fmt.Print(outputStr)
-
 		line = <-readch
 
 		cmd, status = parser.parse(line)
@@ -43,11 +39,17 @@ func Gosh() {
 				exch <- cmd
 				_ = <-exch //block until execution releases
 			}
+			readch <- "" //release prompt
 			//case READING, SELECTING, TRACING:
 		}
 	}
 
 }
 
+func Status() parseStatus {
+	return status
+}
 
 func error(msg string) { fmt.Fprintln(os.Stderr, msg) }
+func debug(msg string) { fmt.Fprint(os.Stdout, "DEBUG "); fmt.Fprintln(os.Stdout, msg) }
+

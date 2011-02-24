@@ -1,26 +1,28 @@
 package main
 
 import (
-	"os"
-	"bufio"
-	"strings"
+	"readline"
 )
 
 /* Read from stdin and pass it along to outch channel */
-func readline(outch chan string) {
-	var linestr string
-	var err os.Error
-	linereader := bufio.NewReader(os.Stdin)
+func prompter(outch chan string) {
+	var linestr *string
+	var eofStr = `exit`
 
 	for {
-		linestr, err = linereader.ReadString('\n')
-		if err != nil {
-			if err != os.EOF {
-				error(err.String() + "Input error")
-			}
-			os.Exit(-1)
+		promptFunc := getPromptFunc(Status())
+		outputStr := promptFunc()
+
+		switch linestr = readline.ReadLine(&outputStr); true {
+
+		case linestr == nil:
+			linestr = &eofStr
+
+		case *linestr != "":
+			readline.AddHistory(*linestr)
 		}
-		/* remove delimiter and trim space */
-		outch <- strings.TrimSpace(linestr[0:len(linestr)-1])
+
+		outch <- *linestr
+		_ = <-outch //wait till we can prompt again
 	}
 }
