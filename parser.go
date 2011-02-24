@@ -25,10 +25,19 @@ func initializeParser() (parser *CommandParser) {
 	return parser
 }
 
-/* TODO use some lex in the future instead */
+/* TODO use some lex in the future instead:
+ * check for redirection, etc.
+ */
 func (p *CommandParser) parse(line string) (action *command, status parseStatus) {
-	tmp := strings.Split(line, " ", 0) //TODO remove hardcoded logic
-	cmdname, args := tmp[0], tmp       //TODO check for redirection, etc
+	var tmp []string
+
+	tmp = strings.Split(line, " ", -1)
+
+	if len(tmp) == 0 {
+		tmp = []string{line}
+	}
+
+	cmdname, args := tmp[0], tmp
 
 	/* default */
 	cmdType := EXTERNAL
